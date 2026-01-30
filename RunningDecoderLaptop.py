@@ -771,7 +771,14 @@ def loop_large_graphs(graph_edges, last_node, filename, save_name, idxMin = None
         print("Number of matter qubits: ", matt_qbts)
         print("Max numb loss photons: ", adaptive_decoder_new.all_min_loss_patterns[0])
         dT = time.time() - t1
+
+
+        save_dict = {"matt": matter_qbts_saved, "loss":los_tol_list}
+        with open(r"\graph_TMP_"+save_name+".json", "w") as fp:
+            json.dump(save_dict, fp)
+
         print("Elapsed Time: %.2f s"%(dT))
+            
     print(matter_qbts_saved)
     save_dict = {"matt": matter_qbts_saved, "loss":los_tol_list}
     with open( r"\graph_" + save_name + ".json", 'w') as fp:
@@ -802,7 +809,8 @@ GraphInformation = {
     "16_1_6_b": {
         "graph_edges": [(0, 7), (0, 8), (0, 9), (0, 12), (0, 15), (0, 16), (1, 3), (1, 4), (1, 7), (1, 13), (1, 15), (1, 16), (2, 8), (2, 10), (2, 11), (2, 13), (2, 15), (3, 5), (3, 6), (3, 10), (3, 13), (4, 5), (4, 8), (4, 14), (4, 15), (5, 6), (5, 8), (5, 9), (5, 10), (5, 14), (6, 9), (6, 11), (6, 12), (6, 13), (6, 14), (6, 16), (7, 10), (7, 11), (7, 14), (8, 9), (8, 10), (8, 15), (8, 16), (9, 11), (10, 16), (11, 13), (12, 13), (12, 14), (12, 15), (13, 15), (15, 16)],
         "last_node":16,
-        "distance" : 5
+        "distance" : 5,
+        "filename" : "final_best_permutations_16_1_6_b.csv",
     },
 
    "24_1_7": {
