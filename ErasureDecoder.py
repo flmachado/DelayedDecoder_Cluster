@@ -681,7 +681,7 @@ class LT_Erasure_decoder_All_Strats(object):
         covered_loss_patts = []
         for idx_lp, loss_patt in enumerate(self.loss_patts):
             if idx_lp % 500 == 0:
-                print("At loss pattern: ", idx_lp)
+                print("At loss pattern: ", idx_lp, " / " , len(self.loss_patts) )
             if list(loss_patt) not in covered_loss_patts:
                 flag, strats = self.run_specific_loss_pattern(loss_patt)
                 if flag:

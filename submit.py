@@ -50,10 +50,10 @@ def get_nested_dict( d, key_list ):
 options = {
     'batch_options' : {
         '-J':'GenerateGraphs',
-        '-p':'serial_requeue',
+        '-p':'sapphire',
         '-n':'1',
         '-N':'1',
-        '-t':'0-16:00:00',
+        '-t':'3-0:00:00',
         '--mem-per-cpu':'1G',
         '--account':'yao_lab',
         '--contiguous':'',
@@ -62,7 +62,8 @@ options = {
     },
 
     'run_options' : {
-        "rep" : [str(i) for i in range(1730)]
+        #"rep" : [str(i) for i in range(1730)]
+        "rep" : [str(i) for i in range(123)]
     }
 }
 
@@ -123,8 +124,8 @@ batch_script += "\n"
 batch_script += "\n"
 batch_script += "\n"
 batch_script += "source /n/home03/fmachado/QuantumNetworks/DelayedDecoder_Cluster/venv/bin/activate\n"
-batch_script += "python /n/home03/fmachado/QuantumNetworks/DelayedDecoder_Cluster/RunningDecoderLaptop.py 16_1_6_b "
-batch_script += ' $((SLURM_ARRAY_TASK_ID * 32)) $((SLURM_ARRAY_TASK_ID * 32 + 32))\n\n'
+batch_script += "python /n/home03/fmachado/QuantumNetworks/DelayedDecoder_Cluster/RunningDecoderLaptop.py 24_1_8_b "
+batch_script += ' $((SLURM_ARRAY_TASK_ID * 1)) $((SLURM_ARRAY_TASK_ID + 1))\n\n'
 
 if '-dry-run' in argv:
     print(batch_script)
