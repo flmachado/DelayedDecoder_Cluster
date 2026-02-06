@@ -4,7 +4,7 @@ from itertools import product
 import time
 from ErasureDecoder import *
 from ParsingDataCode.ParseLargeGraphs import *
-
+from GraphDatabase import GraphInformation
 
 ###################################
 ####### FULL DECODER CLASS ########
@@ -729,12 +729,7 @@ def single_qubit_commute(pauli1, pauli2, qbt):
         return 1
 
 
-
-
-
-
-
-def loop_large_graphs(graph_edges, last_node, filename, save_name, idxMin = None, idxMax = None, distance=4):
+def loop_large_graphs(graph_edges, last_node, erasure_decoderFile, filename, save_name, idxMin = None, idxMax = None, distance=4):
     no_anti_com_flag = False
     n_qbts = last_node
     graph_nodes = list(range(n_qbts + 1))
@@ -742,7 +737,8 @@ def loop_large_graphs(graph_edges, last_node, filename, save_name, idxMin = None
     graph_edges = interchange_nodes(last_node, graph_edges)
     gstate = graph_from_nodes_and_edges(graph_nodes,
                                         graph_edges)
-    erasure_decoder = LT_Erasure_decoder_All_Strats(n_qbts, distance, gstate, in_qbt=in_qubit)
+    erasure_decoder = np.load(erasure_decoderFile, allow_pickle=True).item()
+    ##LT_Erasure_decoder_All_Strats(n_qbts, distance, gstate, in_qbt=in_qubit)
     input_strats = erasure_decoder.strategies_ordered
     measurement_pattners = get_full_m_patt_list(filename)
 
@@ -768,8 +764,8 @@ def loop_large_graphs(graph_edges, last_node, filename, save_name, idxMin = None
         los_tol_list.append(loss_tol)
     
         #print("At idx: ", m_idx)
+        print("Max # loss photons: ", len(adaptive_decoder_new.all_min_loss_patterns[0]))
         print("Number of matter qubits: ", matt_qbts)
-        print("Max numb loss photons: ", adaptive_decoder_new.all_min_loss_patterns[0])
         dT = time.time() - t1
 
 
@@ -784,49 +780,6 @@ def loop_large_graphs(graph_edges, last_node, filename, save_name, idxMin = None
     with open( r"\graph_" + save_name + ".json", 'w') as fp:
         json.dump(save_dict, fp)
 
-
-
-GraphInformation = {
-    "13_1_5_a": {
-        "graph_edges" : [(8, 9), (8, 10), (8, 0), (8, 1), (8, 4), (9, 12), (9, 7), (10, 11), (10, 13), (10, 0), (10, 2), (11, 0), (11, 6), (12, 13), (12, 2), (12, 4), (12, 7), (13, 4), (13, 5), (13, 7), (0, 3), (0, 7), (1, 2), (1, 5), (2, 5), (2, 6), (3, 5), (3, 7), (4, 5), (4, 6)],
-        "last_node" : 13,
-        "distance" : 4,
-        "filename" : "final_best_permutations_13_1_5_a.csv",
-    },
-
-    "13_1_5_c":{
-        "graph_edges": [(11, 5), (11, 6), (11, 7), (11, 8), (11, 10), (12, 13), (12, 2), (12, 3), (12, 4), (12, 7), (13, 1), (13, 7), (13, 8), (13, 10), (0, 1), (0, 2), (0, 4), (1, 2), (1, 5), (1, 6), (2, 6), (2, 10), (3, 9), (3, 10), (4, 7), (5, 9), (6, 7), (6, 8), (8, 9), (8, 10)],
-        "last_node": 13,
-        "distance": 4,
-        },
-
-    "13_1_5_d":{
-        "graph_edges":[(11, 0), (11, 3), (11, 6), (12, 3), (12, 4), (12, 6), (12, 7), (12, 8), (13, 3), (13, 5), (13, 6), (13, 8), (13, 10), (0, 5), (0, 7), (0, 9), (0, 10), (1, 3), (1, 4), (1, 10), (2, 5), (2, 7), (2, 8), (3, 9), (4, 6), (5, 6), (5, 7), (7, 10), (8, 9), (8, 10)],
-        "last_node" : 13,
-        "distance" : 4,
-    },
-       
-    "16_1_6_b": {
-        "graph_edges": [(0, 7), (0, 8), (0, 9), (0, 12), (0, 15), (0, 16), (1, 3), (1, 4), (1, 7), (1, 13), (1, 15), (1, 16), (2, 8), (2, 10), (2, 11), (2, 13), (2, 15), (3, 5), (3, 6), (3, 10), (3, 13), (4, 5), (4, 8), (4, 14), (4, 15), (5, 6), (5, 8), (5, 9), (5, 10), (5, 14), (6, 9), (6, 11), (6, 12), (6, 13), (6, 14), (6, 16), (7, 10), (7, 11), (7, 14), (8, 9), (8, 10), (8, 15), (8, 16), (9, 11), (10, 16), (11, 13), (12, 13), (12, 14), (12, 15), (13, 15), (15, 16)],
-        "last_node":16,
-        "distance" : 5,
-        "filename" : "final_best_permutations_16_1_6_b.csv",
-    },
-
-   "23_1_7": {
-       "graph_edges": [(7, 9), (7, 14), (7, 18), (7, 20), (7, 4), (7, 6), (8, 13), (8, 22), (8, 1), (8, 2), (8, 3), (8, 4), (8, 6), (9, 15), (9, 16), (9, 18), (9, 19), (9, 20), (9, 23), (9, 3), (10, 12), (10, 13), (10, 15), (10, 18), (10, 2), (10, 5), (10, 6), (11, 13), (11, 14), (11, 15), (11, 20), (11, 1), (11, 2), (12, 17), (12, 20), (12, 23), (12, 2), (12, 3), (12, 5), (13, 21), (13, 1), (13, 3), (13, 5), (14, 23), (14, 0), (14, 2), (14, 3), (14, 5), (14, 6), (15, 16), (15, 18), (15, 20), (15, 0), (16, 17), (16, 18), (16, 19), (16, 21), (16, 23), (16, 0), (16, 3), (16, 4), (16, 6), (17, 18), (17, 21), (17, 3), (17, 5), (18, 21), (18, 22), (18, 3), (18, 4), (19, 1), (19, 2), (19, 3), (20, 3), (20, 5), (20, 6), (21, 23), (21, 1), (21, 2), (21, 6), (22, 0), (22, 1), (22, 3), (22, 6), (23, 1), (23, 4), (0, 4), (0, 5), (0, 6), (1, 5), (1, 6), (4, 5), (4, 6)],
-       "last_node":23,
-       "distance" : 6,       
-       },
-
-    "24_1_8": {
-        "graph_edges" : [(0, 2), (0, 3), (0, 8), (0, 12), (0, 19), (0, 20), (0, 21), (0, 22), (1, 10), (1, 11), (1, 12), (1, 14), (1, 15), (1, 17), (1, 23), (2, 4), (2, 5), (2, 6), (2, 7), (2, 9), (2, 11), (2, 16), (2, 17), (2, 21), (2, 22), (3, 4), (3, 6), (3, 10), (3, 12), (3, 13), (3, 16), (3, 24), (4, 7), (4, 9), (4, 12), (4, 13), (4, 15), (4, 23), (5, 6), (5, 9), (5, 14), (5, 17), (5, 18), (5, 21), (5, 24), (6, 8), (6, 10), (6, 11), (6, 12), (6, 14), (6, 16), (6, 17), (6, 18), (7, 9), (7, 13), (7, 14), (7, 21), (7, 22), (8, 17), (8, 18), (8, 19), (8, 21), (8, 22), (9, 13), (9, 15), (9, 16), (9, 20), (10, 11), (10, 13), (10, 14), (10, 19), (10, 24), (11, 16), (11, 20), (11, 21), (11, 22), (12, 14), (12, 23), (13, 16), (13, 17), (13, 23), (14, 15), (14, 17), (14, 18), (14, 22), (14, 23), (15, 18), (15, 21), (15, 23), (15, 24), (16, 21), (16, 24), (17, 20), (17, 21), (17, 23), (18, 19), (18, 22), (18, 23), (19, 20), (19, 22), (19, 23), (19, 24), (20, 22), (20, 23), (21, 23), (21, 24), (23, 24)],
-        "last_node":24,
-        "distance":7,
-        "filename": "final_best_permutations_24_1_8.csv"
-    }
-
-}
         
 
 if __name__ == '__main__':
@@ -848,6 +801,7 @@ if __name__ == '__main__':
     graph_edges = Graph["graph_edges"]
     last_node = Graph["last_node"]
     distance = Graph["distance"]
+    erasure_decoderFile = Graph["stabilizerFile"]
 
     dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
     
@@ -855,6 +809,6 @@ if __name__ == '__main__':
     
     print("Loading file : ", filename)
     
-    loop_large_graphs(graph_edges, last_node, filename, save_name, distance=distance, idxMin = IdxMin, idxMax = IdxMax)
+    loop_large_graphs(graph_edges, last_node, erasure_decoderFile, filename, save_name, distance=distance, idxMin = IdxMin, idxMax = IdxMax)
 
 
