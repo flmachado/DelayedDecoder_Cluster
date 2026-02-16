@@ -1,4 +1,5 @@
 import math
+import time
 import copy
 import numpy as np
 from itertools import combinations
@@ -679,9 +680,18 @@ class LT_Erasure_decoder_All_Strats(object):
         strategies = []
         break_flag = False
         covered_loss_patts = []
+        t1 = time.time()
+        tSingle_1 = time.time()
         for idx_lp, loss_patt in enumerate(self.loss_patts):
+            print(idx_lp, end = ", ")
+            tSingle_2 = time.time()
+            print("Elasped time = %.2f"%(tSingle_2 - tSingle_1))
+            tSingle_1 = time.time()
             if idx_lp % 500 == 0:
+                t2 = time.time()
                 print("At loss pattern: ", idx_lp, " / " , len(self.loss_patts) )
+                print("Elapsed Time for 500 : %.2f"%(t2-t1))
+                t1 = t2
             if list(loss_patt) not in covered_loss_patts:
                 flag, strats = self.run_specific_loss_pattern(loss_patt)
                 if flag:
