@@ -51,31 +51,33 @@ def merge_chunks(graph_description, chunk_dir):
     # Deduplicate strategies (same [pauli_X, pauli_Z] pair)
     seen = set()
     unique_strats = []
-    for strat in all_strats:
-        if key not in seen:
-            seen.add(key)
-            unique_strats.append(strat)
-    print("Unique strategies after dedup: %d" % len(unique_strats))
 
     # Load all chunks and sort by idx_min
     chunks = []
-    for f in chunk_files:
-        chunk = np.load(f, allow_pickle=True).item()
+    for kf, f in enumerate(chunk_files):
+
+        try:
+            chunk = np.load(f, allow_pickle=True).item()
+        except:
+            print("Cannot load file ", f)
+            continue
+        
 
         for strat in chunk["strats"]:
             key = (strat[0], strat[1])
             if key not in seen:
                 seen.add(key)
                 unique_strats.append(strat)
-        
-        del chunk["strats"]
-        del chunk["strategies_ordered"]
-        chunks.append(chunk)
 
+        print(" %d / %d"%(kf, len(chunk_files)))
         print("  Loaded %s: loss patterns [%d, %d), %d strategies" % (
             os.path.basename(f), chunk["idx_min"], chunk["idx_max"],
             len(chunk["strats"])))
         print("Number of unique strats: ", len(unique_strats))
+        
+        del chunk["strats"]
+        del chunk["strategies_ordered"]
+        chunks.append(chunk)
 
     chunks.sort(key=lambda c: c["idx_min"])
 

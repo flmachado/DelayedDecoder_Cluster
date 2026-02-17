@@ -737,6 +737,7 @@ def loop_large_graphs(graph_edges, last_node, erasure_decoderFile, filename, sav
     graph_edges = interchange_nodes(last_node, graph_edges)
     gstate = graph_from_nodes_and_edges(graph_nodes,
                                         graph_edges)
+    print("Loading Erasure Decoder: ", erasure_decoderFile)
     erasure_decoder = np.load(erasure_decoderFile, allow_pickle=True).item()
     ##LT_Erasure_decoder_All_Strats(n_qbts, distance, gstate, in_qbt=in_qubit)
     input_strats = erasure_decoder.strategies_ordered

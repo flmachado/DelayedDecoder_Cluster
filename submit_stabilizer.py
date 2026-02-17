@@ -58,7 +58,9 @@ if __name__ == "__main__":
 
     # Directory setup
     script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    output_dir = os.path.join(script_dir, "stabilizer_chunks_%s" % graph_desc)
+    scratch_dir = "/n/netscratch/yao_lab/Everyone/Francisco/QuantumNetworks/Chunks/"
+    
+    output_dir = os.path.join(scratch_dir, "stabilizer_chunks_%s" % graph_desc)
 
     if not dry_run:
         os.makedirs(output_dir, exist_ok=True)
@@ -67,15 +69,15 @@ if __name__ == "__main__":
     # Build SLURM batch script
     batch_script = """#!/bin/bash
 #SBATCH -J stab_{graph_desc}
-#SBATCH -p sapphire
+#SBATCH -p serial_requeue
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -t 3-0:00:00
+#SBATCH -t 0-3:00:00
 #SBATCH --mem-per-cpu 4G
 #SBATCH --account yao_lab
 #SBATCH --requeue
-#SBATCH -o {output_dir}/%a_stabilizer.out
-#SBATCH -e {output_dir}/%a_stabilizer.err
+#SBATCH -o {output_dir}/%a_{graph_desc}_stabilizer.out
+#SBATCH -e {output_dir}/%a_{graph_desc}_stabilizer.err
 
 echo "Job Id: $SLURM_JOB_ID"
 echo "Array Task Id: $SLURM_ARRAY_TASK_ID"
@@ -90,7 +92,7 @@ fi
 
 echo "Processing loss patterns [$IDX_MIN, $IDX_MAX)"
 
-cd {script_dir}
+cd {output_dir}
 source /n/home03/fmachado/QuantumNetworks/DelayedDecoder_Cluster/venv/bin/activate
 python {script_dir}/ComputeStabilizerChunk.py {graph_desc} $IDX_MIN $IDX_MAX
 """.format(
@@ -106,7 +108,8 @@ python {script_dir}/ComputeStabilizerChunk.py {graph_desc} $IDX_MIN $IDX_MAX
         print(batch_script)
         print("Would submit: sbatch --array=0-%d" % (n_jobs - 1))
     else:
-        batch_file = os.path.join(output_dir, "submit_stabilizer.batch")
+        
+        batch_file = os.path.join(output_dir, "submit_stabilizer_%s.batch"%(graph_desc))
         with open(batch_file, "w") as f:
             f.write(batch_script)
         print("Batch script written to: %s" % batch_file)

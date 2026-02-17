@@ -127,11 +127,13 @@ if __name__ == "__main__":
     graph_edges = interchange_nodes(last_node, graph_edges)
     gstate = graph_from_nodes_and_edges(graph_nodes, graph_edges)
 
+    dirname = os.getcwd()
+    print("Will save to %s"%dirname)
     print("Graph: %s, n_qbts=%d, distance=%d" % (GraphDescription, n_qbts, distance))
 
     chunk_result = compute_chunk(n_qbts, distance, gstate, in_qubit, IdxMin, IdxMax)
 
-    dirname = os.path.dirname(os.path.abspath(sys.argv[0]))
+
     save_name = "%s_chunk_%d_%d.npy" % (GraphDescription, IdxMin, IdxMax)
     save_path = os.path.join(dirname, save_name)
 
