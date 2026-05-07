@@ -98,6 +98,7 @@ def merge_chunks_sampled(graph_description, chunk_dir, top_x, seed):
 
     for kf, f in enumerate(chunk_files):
         t_chunk = time.time()
+
         try:
             chunk = np.load(f, allow_pickle=True).item()
         except Exception:
@@ -117,6 +118,8 @@ def merge_chunks_sampled(graph_description, chunk_dir, top_x, seed):
             chunk_weights.append(compute_meas_weight(strat[0], strat[1], n_qbts))
 
         # Process each loss pattern in this chunk's range
+
+        CurStrat = 0
         n_selected_this_chunk = 0
         for lp_idx in range(idx_min, idx_max):
             lost_set = set(all_loss_idx_combos[lp_idx])
@@ -124,10 +127,11 @@ def merge_chunks_sampled(graph_description, chunk_dir, top_x, seed):
 
             # Find strategies valid for this loss pattern
             valid = []
-            for s_idx in range(n_chunk_strats):
-                if lost_set <= chunk_id_supports[s_idx]:
-                    valid.append((chunk_weights[s_idx], s_idx))
+            while CurStrat < n_chunk_strats and lost_set <= chunk_id_supports[CurStrat]:
+                valid.append( (chunk_weights[CurStrat], CurStrat))
+                CurStrat += 1
 
+            #print("Loss Id %d -> Up To Strat %d"%(lp_idx, CurStrat))
             if not valid:
                 n_no_valid += 1
                 continue
@@ -138,6 +142,12 @@ def merge_chunks_sampled(graph_description, chunk_dir, top_x, seed):
             _, chosen_idx = rng.choice(candidates)
             chosen = chunk_strats[chosen_idx]
             key = (chosen[0], chosen[1])
+            print("\t lp_idx: %d -> chosen_idx: %d"%(lp_idx, chosen_idx))
+            #print("-------------")
+            #print(valid[:top_x])
+            #print(lp_idx, " -> ", key)
+            #print("")
+            
             if key not in selected_strats:
                 selected_strats[key] = chosen
                 n_selected_this_chunk += 1
@@ -212,10 +222,11 @@ if __name__ == "__main__":
     print("Merging chunks (sampled) for: %s" % args.GraphDescription)
     print("Chunk directory: %s" % chunk_dir)
     print("Top X: %d, Seed: %d" % (args.top, args.seed))
-
+    save_name = "%s_StabilizerInformation_Sampled_TopX_%d__Seed_%d.npy" % (args.GraphDescription, args.top, args.seed)
+    print("Will save to %s"%save_name)
+    
     decoder = merge_chunks_sampled(args.GraphDescription, chunk_dir, args.top, args.seed)
 
-    save_name = "%s_StabilizerInformation_Sampled.npy" % args.GraphDescription
     save_path = os.path.join(chunk_dir, save_name)
     np.save(save_path, decoder)
     print("Saved sampled decoder to: %s" % save_path)

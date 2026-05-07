@@ -1211,15 +1211,16 @@ def loop_large_graphs(
         print("Number of matter qubits: ", matt_qbts)
         dT = time.time() - t1
 
-        save_dict = {"matt": matter_qbts_saved, "loss": los_tol_list}
-        with open(r"\graph_TMP_" + save_name + ".json", "w") as fp:
+
+        save_dict = {"matt": matter_qbts_saved, "loss":los_tol_list}
+        with open(r"graph_V2_TMP_"+save_name+".json", "w") as fp:
             json.dump(save_dict, fp)
 
         print("Elapsed Time: %.2f s" % (dT))
 
     print(matter_qbts_saved)
-    save_dict = {"matt": matter_qbts_saved, "loss": los_tol_list}
-    with open(save_name + ".json", "w") as fp:
+    save_dict = {"matt": matter_qbts_saved, "loss":los_tol_list}
+    with open( r"graph_V2_" + save_name + ".json", 'w') as fp:
         json.dump(save_dict, fp)
 
 
@@ -1235,15 +1236,16 @@ if __name__ == "__main__":
     GraphDescription = sys.argv[1]
     IdxMin = int(sys.argv[2])
     IdxMax = int(sys.argv[3])
-
-    # Destination of permutation files that Gefen uploaded, for instance: r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_d.csv"
-
-    save_name = GraphDescription + "_From%d_To%d" % (IdxMin, IdxMax)
+    Seed   = int(sys.argv[4])
+    
+    # Destination of permutation files that Gefen uploaded, for instance: r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_d.csv"    
+    
+    save_name = "MDecFromDecisionTree_" + GraphDescription + "_From%d_To%d_Seed%d"%(IdxMin, IdxMax, Seed)
     Graph = GraphInformation[GraphDescription]
     graph_edges = Graph["graph_edges"]
     last_node = Graph["last_node"]
     distance = Graph["distance"]
-    erasure_decoderFile = Graph["stabilizerFile"]
+    erasure_decoderFile = Graph["stabilizerFile"] % Seed
 
     dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
 

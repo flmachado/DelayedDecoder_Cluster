@@ -36,7 +36,7 @@ GraphInformation = {
        "last_node":23,
        "distance" : 6,   
         "filename": "final_best_permutations_23_1_7.csv",
-        "stabilizerFile" : "23_1_7_StabilizerInformation.npy",
+        "stabilizerFile" : "23_1_7_StabilizerInformation_Sampled_TopX_20__Seed_%d.npy",
 
        },
 
@@ -45,7 +45,7 @@ GraphInformation = {
         "last_node":24,
         "distance":7,
         "filename": "final_best_permutations_24_1_8.csv",
-        "stabilizerFile" : "24_1_8_StabilizerInformation.npy",
+        "stabilizerFile" : "24_1_8_StabilizerInformation_Sampled_TopX_20__Seed_%d.npy", 
     }
 
 }
