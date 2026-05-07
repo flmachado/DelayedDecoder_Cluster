@@ -1,12 +1,10 @@
 import math
-import time
 from itertools import product
 
 import numpy as np
-
 from decision_tree_v2 import *
+
 from ErasureDecoder import *
-from GraphDatabase import GraphInformation
 from ParsingDataCode.ParseLargeGraphs import *
 
 ###################################
@@ -359,7 +357,8 @@ class LT_FullHybridDecoderNew(object):
                     meas_qbt.append(item)
                 # print("Meas before: ", meas_before, meas_qbt)
                 strats = copy.deepcopy(tree_dict[key][0])
-
+                # print("meas before: ", meas_before)
+                # print("meas qbt: ", meas_qbt)
                 next_meas_qbt = 0
                 for qbt in self.measurement_order:
                     if qbt not in meas_before:
@@ -382,6 +381,9 @@ class LT_FullHybridDecoderNew(object):
                 tree_dict = self.update_identity_in_tree_meas_pattern(
                     meas_qbt, starting_stab, tree_dict, key
                 )
+
+                # meas_qbt = [item for item in tree_dict[key][1]]
+                # meas_before = [pair[0] for pair in meas_qbt]
                 # succes_measured_stabs[key] = [starting_stab, copy.deepcopy(meas_qbt), meas_order, copy.deepcopy(lost_output_qbt)]
                 pot_new_output_qbt = starting_stab[0][1]
                 # print("pot new output: ", pot_new_output_qbt)
@@ -419,10 +421,7 @@ class LT_FullHybridDecoderNew(object):
                     copy.deepcopy(lost_output_qbt),
                     starting_qbts,
                 ]
-                # starting_qbts = self.pick_qbt_to_measure(tree_dict[key][0][0], tree_dict[key][0], starting_qbts)
-                # print("Starting start: ", starting_stab, lost_qbts, starting_qbts, meas_qbt)
-                # print(strats)
-                # print()
+
                 for qbt in starting_qbts:
                     update_strats = self.filter_strat_lost_qubit(strats, qbt)
                     save_key = key + "," + str(qbt)
@@ -463,22 +462,6 @@ class LT_FullHybridDecoderNew(object):
                             copy.deepcopy(lost_output_qbt),
                             starting_qbts,
                         ]
-
-                        # succes_measured_stabs[save_key] = [update_strats, copy.deepcopy(meas_qbt), copy.deepcopy(meas_order), copy.deepcopy(lost_output_qbt)]
-                        # print("FININSHED: ", update_strats, meas_qbt, qbt)
-                        # meas_qbt = self.update_meas_qbts_in_loop(
-                        #     meas_qbt, update_strats[0]
-                        # )
-                        # meas_qbt = self.update_identity_in_meas_qbts_in_loop(
-                        #     meas_qbt, update_strats[0]
-                        # )
-                        # succes_measured_stabs[save_key] = [
-                        #     update_strats,
-                        #     copy.deepcopy(meas_qbt),
-                        #     copy.deepcopy(meas_order),
-                        #     copy.deepcopy(lost_output_qbt),
-                        #     starting_qbts,
-                        # ]
                     else:
                         # This lead to a logical loss, add the loss pattern to keep track of distance
                         lost_qbts = self.from_key_get_list_of_lost_qbt(
@@ -531,7 +514,6 @@ class LT_FullHybridDecoderNew(object):
             tree_branch.append(list_of_anti_support[-1])
             # print("Anti support: ", list_of_anti_support[-1])
             self.tree_branches.append(tree_branch)
-
             # self.get_anticommuting_support(succ_patt, anti_support, list_of_anti_support, output_qbt)
             lost = self.from_key_get_lost_qbt(key)
             if self.printing:
@@ -562,7 +544,6 @@ class LT_FullHybridDecoderNew(object):
             succ_patterns.append([trans, lost])
         if self.printing:
             print("succ patterns, [trans, lost]: ", succ_patterns)
-
         self.anti_support_dict_hybrid[output_qbt] = list_of_anti_support  # anti_support
         for qbt in anti_support:
             if qbt not in self.anti_support_list_hybrid:
@@ -576,7 +557,6 @@ class LT_FullHybridDecoderNew(object):
         new_pauli_meas = ""
         new_pauli_meas_qbt = 0
         flag = False
-        new_tree = {}
         for meas_pair in meas_qbts:
             qbt, meas_outcome = meas_pair
             if meas_outcome == "A":
@@ -605,7 +585,6 @@ class LT_FullHybridDecoderNew(object):
         new_pauli_meas = []
         new_pauli_meas_qbt = []
         flag = False
-
         for meas_pair in meas_qbts:
             qbt, meas_outcome = meas_pair
             if meas_outcome == "I":
@@ -613,7 +592,6 @@ class LT_FullHybridDecoderNew(object):
                     new_pauli_meas.append(new_pauli_measurements[qbt])
                     new_pauli_meas_qbt.append(qbt)
                     flag = True
-
         if flag:
             first_item, meas_qbts_prev, third_item = tree[current_key]
             new_meas_qbts_prev = []
@@ -708,7 +686,6 @@ class LT_FullHybridDecoderNew(object):
         else:
             pauli = outcome_list[0][3]
             output_qbt = outcome_list[0][0][1]
-        # print("Pauli: ", pauli, meas_qbts)
         this_traj_anti.append(init_output_qbt)
         if output_qbt not in this_traj_anti:
             this_traj_anti.append(output_qbt)
@@ -723,6 +700,7 @@ class LT_FullHybridDecoderNew(object):
                     or qbt == output_qbt
                     or meas_pauli == "I"
                 ):
+                    # if pauli[qbt] == "I" or pauli[qbt] == meas_pauli or meas_pauli == "I":
                     continue
                 else:
                     this_traj_anti.append(qbt)
@@ -1145,43 +1123,21 @@ def run_large_graphs():
     # print("with matt qbts: ", adaptive_decoder_new.all_min_loss_patterns)
 
 
-def loop_large_graphs(
-    graph_edges,
-    last_node,
-    erasure_decoderFile,
-    filename,
-    save_name,
-    idxMin=None,
-    idxMax=None,
-    distance=4,
-):
+def loop_large_graphs(graph_edges, last_node, filename, save_name, distance=4):
     no_anti_com_flag = False
     n_qbts = last_node
     graph_nodes = list(range(n_qbts + 1))
     in_qubit = 0
     graph_edges = interchange_nodes(last_node, graph_edges)
     gstate = graph_from_nodes_and_edges(graph_nodes, graph_edges)
-    print("Loading Erasure Decoder: ", erasure_decoderFile)
-    erasure_decoder = np.load(erasure_decoderFile, allow_pickle=True).item()
-    ##LT_Erasure_decoder_All_Strats(n_qbts, distance, gstate, in_qbt=in_qubit)
-    #   ## CURRENT DECODER erasure_decoder = LT_Erasure_decoder(n_qbts, distance, gstate, in_qbt=in_qubit)
+    erasure_decoder = LT_Erasure_decoder(n_qbts, distance, gstate, in_qbt=in_qubit)
+    # erasure_decoder = LT_Erasure_decoder_All_Strats(n_qbts, distance, gstate, in_qbt=in_qubit)
     input_strats = erasure_decoder.strategies_ordered
     measurement_pattners = get_full_m_patt_list(filename)
     print("Number of measurement patterns: ", len(measurement_pattners))
-
-    if (idxMin == None) or (idxMax == None):
-        idxMin = 0
-        idxMax = len(measurement_pattners)
-
     matter_qbts_saved = []
     los_tol_list = []
-
-    for m_idx in range(idxMin, idxMax):
-        meas_pattern_list = measurement_pattners[m_idx]
-
-        t1 = time.time()
-        print("%d -- %d -- %d" % (idxMin, m_idx, idxMax), end=", ")
-        print("Meas_Pattern_list: ", meas_pattern_list)
+    for m_idx, meas_pattern_list in enumerate(measurement_pattners):
         adaptive_decoder_new = LT_FullHybridDecoderNew(
             copy.deepcopy(gstate),
             copy.deepcopy(input_strats),
@@ -1200,64 +1156,79 @@ def loop_large_graphs(
         matt_qbts, all_leaves, _ = compute_branching_capture_delay(
             tree, node_info, name_idx, leaf_idxs, all_leaves, printing=False
         )
+
         matter_qbts_saved.append(matt_qbts)
         loss_tol = len(adaptive_decoder_new.all_min_loss_patterns[0])
         los_tol_list.append(loss_tol)
-
-        # print("At idx: ", m_idx)
-        print(
-            "Max # loss photons: ", len(adaptive_decoder_new.all_min_loss_patterns[0])
-        )
-        print("Number of matter qubits: ", matt_qbts)
-        dT = time.time() - t1
-
-        save_dict = {"matt": matter_qbts_saved, "loss": los_tol_list}
-        with open(r"\graph_TMP_" + save_name + ".json", "w") as fp:
-            json.dump(save_dict, fp)
-
-        print("Elapsed Time: %.2f s" % (dT))
-
+        if m_idx % 100 == 0:
+            print("At idx: ", m_idx)
+            print("Number of matter qubits: ", matt_qbts)
+            print(
+                "Max numb loss photons: ", adaptive_decoder_new.all_min_loss_patterns[0]
+            )
+            print("Current number of minimum matter qubits: ", min(matter_qbts_saved))
+            print()
     print(matter_qbts_saved)
     save_dict = {"matt": matter_qbts_saved, "loss": los_tol_list}
+    # with open(save_dir + r'\13_a_qbt_graph_data' + ".json", 'w') as fp:
+    #     json.dump(save_dict, fp)
     with open(save_name + ".json", "w") as fp:
         json.dump(save_dict, fp)
 
 
 if __name__ == "__main__":
-    import os
-    import sys
+    # NOTES: For these small graphs I do not neccessarily need matter qubits, I just fail the normal adaptive decoder
+    # if we fix the measurement pattern. And If I fix the Measurement pattern I expect I need matter qubits.
     from itertools import permutations
 
     import matplotlib.pyplot as plt
 
     from CodeFunctions.graphs import *
 
-    GraphDescription = sys.argv[1]
-    IdxMin = int(sys.argv[2])
-    IdxMax = int(sys.argv[3])
-
-    # Destination of permutation files that Gefen uploaded, for instance: r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_d.csv"
-
-    save_name = GraphDescription + "_From%d_To%d" % (IdxMin, IdxMax)
-    Graph = GraphInformation[GraphDescription]
-    graph_edges = Graph["graph_edges"]
-    last_node = Graph["last_node"]
-    distance = Graph["distance"]
-    erasure_decoderFile = Graph["stabilizerFile"]
-
-    dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
-
-    filename = os.path.join(dirname, Graph["filename"])
-
-    print("Loading file : ", filename)
-
-    loop_large_graphs(
-        graph_edges,
-        last_node,
-        erasure_decoderFile,
-        filename,
-        save_name,
-        distance=distance,
-        idxMin=IdxMin,
-        idxMax=IdxMax,
-    )
+    # search_for_meas_patterns()
+    # run_large_graphs()
+    # search_for_meas_patterns_cube()
+    # filename = r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_d.csv"
+    # filename = r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_a.csv"
+    filename = r"C:\Users\bdt697\Downloads\final_best_permutations_13_1_5_c.csv"
+    # filename = r"C:\Users\bdt697\Downloads\final_best_permutations_16_1_6.csv"
+    save_name = "13_1_5_c_qbt_graph_data"
+    # 13_1_5_d_data
+    graph_edges = [
+        (11, 5),
+        (11, 6),
+        (11, 7),
+        (11, 8),
+        (11, 10),
+        (12, 13),
+        (12, 2),
+        (12, 3),
+        (12, 4),
+        (12, 7),
+        (13, 1),
+        (13, 7),
+        (13, 8),
+        (13, 10),
+        (0, 1),
+        (0, 2),
+        (0, 4),
+        (1, 2),
+        (1, 5),
+        (1, 6),
+        (2, 6),
+        (2, 10),
+        (3, 9),
+        (3, 10),
+        (4, 7),
+        (5, 9),
+        (6, 7),
+        (6, 8),
+        (8, 9),
+        (8, 10),
+    ]  # c
+    # graph_edges = [(8, 9), (8, 10), (8, 0), (8, 1), (8, 4), (9, 12), (9, 7), (10, 11), (10, 13), (10, 0), (10, 2), (11, 0), (11, 6), (12, 13), (12, 2), (12, 4), (12, 7), (13, 4), (13, 5), (13, 7), (0, 3), (0, 7), (1, 2), (1, 5), (2, 5), (2, 6), (3, 5), (3, 7), (4, 5), (4, 6)] # a
+    # graph_edges = [(11, 0), (11, 3), (11, 6), (12, 3), (12, 4), (12, 6), (12, 7), (12, 8), (13, 3), (13, 5), (13, 6), (13, 8), (13, 10), (0, 5), (0, 7), (0, 9), (0, 10), (1, 3), (1, 4), (1, 10), (2, 5), (2, 7), (2, 8), (3, 9), (4, 6), (5, 6), (5, 7), (7, 10), (8, 9), (8, 10)] # d
+    last_node = 13
+    distance = 4
+    loop_large_graphs(graph_edges, last_node, filename, save_name, distance=distance)
+    # search_for_meas_patterns_cube(n_qbts=7)
